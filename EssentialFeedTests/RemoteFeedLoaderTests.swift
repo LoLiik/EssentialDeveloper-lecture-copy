@@ -152,7 +152,7 @@ class RemoteFeedLoaderTests: XCTestCase {
 
         func complete(withStatusCode code: Int, data: Data, at index: Int = 0) {
             let response = HTTPURLResponse(
-                url: requestedURLs[0],
+                url: requestedURLs[index],
                 statusCode: code,
                 httpVersion: nil,
                 headerFields: nil
