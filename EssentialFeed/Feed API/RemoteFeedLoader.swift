@@ -28,7 +28,7 @@ public final class RemoteFeedLoader {
         case connectivity
         case invalidData
     }
-    
+
     public enum Result: Equatable {
         case success([FeedItem])
         case failure(Error)
@@ -43,8 +43,8 @@ public final class RemoteFeedLoader {
         client.get(from: url) { clientResponse in
             switch clientResponse {
             case .success(let data, _):
-                if let _ = try? JSONSerialization.jsonObject(with: data) {
-                    completion(.success([]))
+                if let root = try? JSONDecoder().decode(Root.self, from: data) {
+                    completion(.success(root.items))
                 } else {
                     completion(.failure(.invalidData))
                 }
@@ -54,6 +54,11 @@ public final class RemoteFeedLoader {
         }
     }
 
+}
+
+
+private struct Root: Decodable {
+    var items: [FeedItem]
 }
 
 
