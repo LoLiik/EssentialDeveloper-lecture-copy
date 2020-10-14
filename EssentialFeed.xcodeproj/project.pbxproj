@@ -85,8 +85,8 @@
 			children = (
 				FD9FB4212534425B00E8EEAD /* EssentialFeed.h */,
 				FD9FB4222534425B00E8EEAD /* Info.plist */,
-				FD9FB45325344E8100E8EEAD /* Feed API */,
 				FD9FB4422534446F00E8EEAD /* Feed Feature */,
+				FD9FB45325344E8100E8EEAD /* Feed API */,
 			);
 			path = EssentialFeed;
 			sourceTree = "<group>";
