@@ -17,10 +17,14 @@ class URLSessionHTTPClient {
         self.session = session
     }
 
+    struct UnexpectedValuesRepresentation: Error {}
+    
     func get(from url: URL, completion: @escaping (HTTPClientResponse) -> Void) {
         let task = session.dataTask(with: url) { _, _, error in
             if let error = error {
                 completion(.failure(error))
+            } else {
+                completion(.failure(UnexpectedValuesRepresentation()))
             }
         }
         task .resume()
@@ -29,12 +33,12 @@ class URLSessionHTTPClient {
 }
 
 class URLSessionHTTPClientTests: XCTestCase {
-    
+
     override class func setUp() {
         super.setUp()
         URLProtocolStub.startInterceptingRequests()
     }
-    
+
     override class func tearDown() {
         super.tearDown()
         URLProtocolStub.stopInterceptingRequests()
@@ -66,7 +70,7 @@ class URLSessionHTTPClientTests: XCTestCase {
             case .failure(let receivedError as NSError):
                 XCTAssertEqual(receivedError, error)
             default:
-                XCTFail("Expected failure with error \(error) got \(result) instead.")
+                XCTFail("Expected failure with error \(error), got \(result) instead.")
             }
 
             exp.fulfill()
@@ -74,19 +78,37 @@ class URLSessionHTTPClientTests: XCTestCase {
 
         wait(for: [exp], timeout: 1.0)
     }
-    
+
+    func test_getFromURL_failsOnAllNilValues() {
+        URLProtocolStub.stub(data: nil, response: nil, error: nil)
+
+        let exp = expectation(description: "Wail for completion")
+        makeSUT().get(from: anyURL()) { result in
+            switch result {
+            case .failure:
+                break
+            default:
+                XCTFail("Expected failure, got \(result) instead.")
+            }
+
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 1.0)
+    }
+
     // MARK: - Helpers
-    
+
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> URLSessionHTTPClient {
         let sut = URLSessionHTTPClient()
         trackForMemoryLeak(sut, file: file, line: line)
         return sut
     }
-    
+
     private func anyURL() -> URL {
         return URL(string: "http://a-url.com")!
     }
-    
+
 }
 
 
