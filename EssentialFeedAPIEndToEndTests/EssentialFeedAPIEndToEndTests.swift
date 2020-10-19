@@ -11,23 +11,10 @@ import EssentialFeed
 class EssentialFeedAPIEndToEndTests: XCTestCase {
 
     func test_endToEndTestServerGetFeedResult_matchesFixedTestAccoundData() {
-        let testServerURL = URL(string: "https://essentialdeveloper.com/feed-case-study/test-api/feed")!
-        let client = URLSessionHTTPClient()
-        let loader = RemoteFeedLoader(url: testServerURL, client: client)
-        
-        let exp = expectation(description: "Wait for load completion")
-        var recievedResult: LoadFeedResult?
-        loader.load() { result in
-            recievedResult = result
-            exp.fulfill()
-        }
-        
-        wait(for: [exp], timeout: 5.0)
-        
+        let recievedResult = getFeedResult()
         switch recievedResult {
         case let .success(items)?:
             XCTAssertEqual(items.count, 8, "Expected 8 items in the test account feed")
-            
             XCTAssertEqual(items[0], expectedItem(at: 0))
             XCTAssertEqual(items[1], expectedItem(at: 1))
             XCTAssertEqual(items[2], expectedItem(at: 2))
@@ -43,14 +30,28 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
             XCTFail("Exptected successful feed result, got no result instead")
         }
     }
-    
+
 //    MARK: - Helpers
-    
-    
+    private func getFeedResult() -> LoadFeedResult? {
+        let testServerURL = URL(string: "https://essentialdeveloper.com/feed-case-study/test-api/feed")!
+        let client = URLSessionHTTPClient()
+        let loader = RemoteFeedLoader(url: testServerURL, client: client)
+
+        let exp = expectation(description: "Wait for load completion")
+        var recievedResult: LoadFeedResult?
+        loader.load() { result in
+            recievedResult = result
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 5.0)
+        return recievedResult
+    }
+
     private func expectedItem(at index: Int) -> FeedItem {
         return FeedItem(id: id(at: index), description: description(at: index), location: location(at: index), imageURL: imageURL(at: index))
     }
-    
+
     private func id(at index: Int) -> UUID {
         let ids = [
             "73A7F70C-75DA-4C2E-B5A3-EED40DC53AA6",
@@ -64,7 +65,7 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
         ]
         return UUID(uuidString: ids[index])!
     }
-    
+
     private func description(at index: Int) -> String? {
         let descriptions = [
             "Description 1",
@@ -78,7 +79,7 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
         ]
         return descriptions[index]
     }
-    
+
     private func location(at index: Int) -> String? {
         let locations = [
             "Location 1",
@@ -92,8 +93,8 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
         ]
         return locations[index]
     }
-    
+
     private func imageURL(at index: Int) -> URL {
-        return URL(string: "https://url-\(index+1).com")!
+        return URL(string: "https://url-\(index + 1).com")!
     }
 }
